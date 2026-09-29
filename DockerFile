@@ -1,0 +1,26 @@
+FROM python:3.10-slim 
+
+WORKDIR /app 
+#thiết lập app làm thư mục mực định  để chạy các lệnh tiếp theo
+# nếu app ch tồn tại, tự tạo mới 
+
+COPY requirements.txt .
+# copy requiement từ host vào thư mục app, dấu . đại diện cho app
+
+RUN pip install --no-cache-dir -r requirements.txt
+#run: chạy lệnh này trong khi build image
+#--no...: cấm pip lưu lại cache, giảm bộ nhớ cho image 
+
+COPY . . 
+#sao chép toàn bộ souce từ folder ở host vào fold của Container 
+
+#có 2 lệnh copy vì nó khôn, nếu sau này k có đổi thư viện thì nó sẽ bỏ qua pip install 
+
+EXPOSE 8000 
+#khai báo cổng 
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--post", "8000"]
+#các lệnh mặc định dc thực thi khi chính thức chạy container 
+
+
+
