@@ -1,0 +1,20 @@
+version : '3.8'
+
+services: 
+
+  web_api: 
+    build: 
+    container_name: churn_fastapi_app 
+    ports:
+      -"8000:8000"
+    environment:
+      - REDIS_HOST=redis_cache
+    depends_on:
+      - redis_cache
+
+  #Service 2
+  redis_cache: 
+    image: redis:alpine 
+    container_name: churn_redis_db
+    ports:
+      -"6379:6379"

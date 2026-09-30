@@ -47,31 +47,27 @@ def home():
 
 
 @app.post("/predict")
-def predict(data: CustomerData):
+async def predict(data: CustomerData):
+    if data.age <= 0 or data.tenure < 0:
+        raise HTTPException(
+            status_code=400, detail="Age and Tenure must be positive value!"
+        )
+
     try:
-        # Chuyển dữ liệu đầu vào thành Mảng 2D [[tenure, monthly_charges, total_charges, age]]
         raw_features = [
-            [data.tenure, data.monthly_charges, data.total_charges, data.age]
+            [data.tenure, data.monthly_changes, data.total_changes, data.age]
         ]
-
-        # Standardize dữ liệu
         scaled_features = scaler.transform(raw_features)
-
-        # Chuyển sang Tensor PyTorch
         input_tensor = torch.tensor(scaled_features, dtype=torch.float32)
 
-        # Dự đoán
         with torch.no_grad():
             logit = model(input_tensor)
             prob = torch.sigmoid(logit).item()
 
-        churn_prediction = int(prob > 0.5)
-
         return {
-            "churn_probability": round(prob, 4),
-            "is_churn": bool(churn_prediction),
+            "churn_prob": round(prob, 4),
+            "is_churn": bool(prob > 0.5),
             "status": "Success",
         }
     except Exception as e:
-        # Nếu có lỗi sẽ trả về chi tiết thay vì lỗi 500 chung chung
-        raise HTTPException(status_code=500, detail=f"Inference Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Inferene error: {str(e)}")
